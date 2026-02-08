@@ -24,6 +24,8 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
+  const confirmation = formData.get("confirm").toString().trim().toUpperCase();
+
   if (confirmation !== "DELETE") {
     statusMessage.textContent = "Please type DELETE exactly to confirm.";
     statusMessage.style.color = "#c02828";
@@ -40,6 +42,9 @@ form.addEventListener("submit", (event) => {
   statusMessage.style.color = "#1f6a31";
   form.reset();
   updateDeleteState();
+  statusMessage.textContent = "Request submitted. Your account deletion is now in progress.";
+  statusMessage.style.color = "#1f6a31";
+  form.reset();
 });
 
 cancelButton.addEventListener("click", () => {
@@ -52,3 +57,4 @@ cancelButton.addEventListener("click", () => {
 form.addEventListener("input", updateDeleteState);
 form.addEventListener("change", updateDeleteState);
 updateDeleteState();
+});
