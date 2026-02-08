@@ -1,6 +1,5 @@
 const form = document.getElementById("delete-form");
 const statusMessage = document.getElementById("status");
-const cancelButton = document.getElementById("cancel-btn");
 const deleteButton = document.getElementById("delete-btn");
 
 const updateDeleteState = () => {
