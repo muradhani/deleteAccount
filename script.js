@@ -5,6 +5,15 @@ const cancelButton = document.getElementById("cancel-btn");
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   const formData = new FormData(form);
+  const contact = formData.get("contact").toString().trim();
+  const confirmation = formData.get("confirm").toString().trim().toUpperCase();
+
+  if (!contact) {
+    statusMessage.textContent = "Please provide your email or phone number.";
+    statusMessage.style.color = "#c02828";
+    return;
+  }
+
   const confirmation = formData.get("confirm").toString().trim().toUpperCase();
 
   if (confirmation !== "DELETE") {
