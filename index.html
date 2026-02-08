@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delete Your Account</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="card">
+        <header class="card__header">
+          <p class="eyebrow">Account settings</p>
+          <h1>Delete your account</h1>
+          <p class="subtitle">
+            This action permanently removes your profile, settings, and saved data. It
+            cannot be undone.
+          </p>
+        </header>
+
+        <div class="summary">
+          <h2>What happens when you delete</h2>
+          <ul>
+            <li>Your profile and personal data are permanently removed.</li>
+            <li>Active sessions are signed out immediately.</li>
+            <li>Billing and subscriptions are canceled.</li>
+          </ul>
+        </div>
+
+        <form class="form" id="delete-form">
+          <label class="field">
+            <span>Type <strong>DELETE</strong> to confirm</span>
+            <input
+              type="text"
+              name="confirm"
+              placeholder="DELETE"
+              autocomplete="off"
+              required
+            />
+          </label>
+
+          <label class="field">
+            <span>Tell us why you're leaving (optional)</span>
+            <textarea name="reason" rows="4" placeholder="Your feedback helps us improve."></textarea>
+          </label>
+
+          <label class="checkbox">
+            <input type="checkbox" name="acknowledge" required />
+            <span>I understand this action is permanent.</span>
+          </label>
+
+          <div class="actions">
+            <button type="submit" class="btn btn--danger">Delete account</button>
+            <button type="button" class="btn btn--ghost" id="cancel-btn">Cancel</button>
+          </div>
+        </form>
+
+        <p class="note" id="status" role="status" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
