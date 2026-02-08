@@ -12,6 +12,7 @@ const updateDeleteState = () => {
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
+
   const formData = new FormData(form);
   const contact = formData.get("contact").toString().trim();
   const confirmation = formData.get("confirm").toString().trim().toUpperCase();
@@ -23,8 +24,6 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
-  const confirmation = formData.get("confirm").toString().trim().toUpperCase();
-
   if (confirmation !== "DELETE") {
     statusMessage.textContent = "Please type DELETE exactly to confirm.";
     statusMessage.style.color = "#c02828";
@@ -32,18 +31,18 @@ form.addEventListener("submit", (event) => {
   }
 
   if (!acknowledged) {
-    statusMessage.textContent = "Please acknowledge that this action is permanent.";
+    statusMessage.textContent =
+      "Please acknowledge that this action is permanent.";
     statusMessage.style.color = "#c02828";
     return;
   }
 
-  statusMessage.textContent = "Request submitted. Your account deletion is now in progress.";
+  statusMessage.textContent =
+    "Request submitted. Your account deletion is now in progress.";
   statusMessage.style.color = "#1f6a31";
+
   form.reset();
   updateDeleteState();
-  statusMessage.textContent = "Request submitted. Your account deletion is now in progress.";
-  statusMessage.style.color = "#1f6a31";
-  form.reset();
 });
 
 cancelButton.addEventListener("click", () => {
