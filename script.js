@@ -14,6 +14,8 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
+  const confirmation = formData.get("confirm").toString().trim().toUpperCase();
+
   if (confirmation !== "DELETE") {
     statusMessage.textContent = "Please type DELETE exactly to confirm.";
     statusMessage.style.color = "#c02828";
