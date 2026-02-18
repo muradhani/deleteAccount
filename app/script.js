@@ -1,11 +1,14 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import {
+  getAuth,
+  deleteUser,
+  reauthenticateWithCredential,
+  EmailAuthProvider
+} from "firebase/auth";
 
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyBwJGOGCD8_fj-S6E1Ka8vgjhJp5Ef5SSA",
   authDomain: "come-true-e5671.firebaseapp.com",
@@ -19,8 +22,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-
-
+const auth = getAuth(app);
 
 const form = document.getElementById("delete-form");
 const statusMessage = document.getElementById("status");
@@ -33,24 +35,24 @@ const setStatus = (message, color) => {
 
 const updateDeleteState = () => {
   const formData = new FormData(form);
-  const confirmation = formData.get("confirm").toString().trim().toUpperCase();
+  const confirmation = formData.get("confirm")?.toString().trim().toUpperCase();
   const acknowledged = Boolean(formData.get("acknowledge"));
+  const email = formData.get("email")?.toString().trim();
+  const password = formData.get("password")?.toString().trim();
 
-  deleteButton.disabled = !(confirmation === "DELETE" && acknowledged);
+  // Button is enabled only if DELETE is typed, permanent action is acknowledged, and credentials are provided
+  deleteButton.disabled = !(confirmation === "DELETE" && acknowledged && email && password);
 };
 
-const tryReauthenticateAndDelete = async (user, password) => {
-  if (!password) {
-    setStatus(
-      "For security, Firebase requires recent login. Enter your current password and try again.",
-      "#c02828"
-    );
-    return;
+const tryReauthenticateAndDelete = async (user, email, password) => {
+  try {
+    const credential = EmailAuthProvider.credential(email, password);
+    await reauthenticateWithCredential(user, credential);
+    await deleteUser(user);
+    return true;
+  } catch (error) {
+    throw error;
   }
-
-  const credential = EmailAuthProvider.credential(user.email, password);
-  await reauthenticateWithCredential(user, credential);
-  await deleteUser(user);
 };
 
 form.addEventListener("submit", async (event) => {
@@ -59,6 +61,7 @@ form.addEventListener("submit", async (event) => {
   const formData = new FormData(form);
   const confirmation = formData.get("confirm").toString().trim().toUpperCase();
   const acknowledged = Boolean(formData.get("acknowledge"));
+  const email = formData.get("email").toString().trim();
   const password = formData.get("password").toString().trim();
 
   if (confirmation !== "DELETE") {
@@ -83,24 +86,18 @@ form.addEventListener("submit", async (event) => {
 
   try {
     await deleteUser(user);
-    setStatus("Your Firebase Auth account was deleted successfully.", "#1f6a31");
+    setStatus("Your account was deleted successfully.", "#1f6a31");
     form.reset();
     updateDeleteState();
   } catch (error) {
     if (error?.code === "auth/requires-recent-login") {
       try {
-        await tryReauthenticateAndDelete(user, password);
-        setStatus(
-          "Re-authenticated and deleted successfully.",
-          "#1f6a31"
-        );
+        await tryReauthenticateAndDelete(user, email, password);
+        setStatus("Re-authenticated and deleted successfully.", "#1f6a31");
         form.reset();
         updateDeleteState();
       } catch (reauthError) {
-        setStatus(
-          `Delete failed after re-authentication: ${reauthError.message}`,
-          "#c02828"
-        );
+        setStatus(`Verification failed: ${reauthError.message}`, "#c02828");
       }
     } else {
       setStatus(`Delete failed: ${error.message}`, "#c02828");

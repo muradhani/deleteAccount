@@ -29,23 +29,24 @@
 
         <form class="form" id="delete-form">
           <label class="field">
-            <span>Type <strong>DELETE</strong> to confirm</span>
+            <span>Email or Username or phone number</span>
             <input
               type="text"
-              name="confirm"
-              placeholder="DELETE"
-              autocomplete="off"
+              name="email"
+              placeholder="Enter your email or username or phone number"
+              autocomplete="email"
               required
             />
           </label>
 
           <label class="field">
-            <span>Current password (only needed if Firebase asks for recent login)</span>
+            <span>Password</span>
             <input
               type="password"
               name="password"
-              placeholder="Enter current password"
+              placeholder="Enter your password"
               autocomplete="current-password"
+              required
             />
           </label>
 
@@ -53,7 +54,16 @@
             <span>Tell us why you're leaving (optional)</span>
             <textarea name="reason" rows="4" placeholder="Your feedback helps us improve."></textarea>
           </label>
-
+          <label class="field">
+            <span>Type <strong>DELETE</strong> to confirm</span>
+            <input
+                    type="text"
+                    name="confirm"
+                    placeholder="DELETE"
+                    autocomplete="off"
+                    required
+            />
+          </label>
           <label class="checkbox">
             <input type="checkbox" name="acknowledge" required />
             <span>I understand this action is permanent.</span>
