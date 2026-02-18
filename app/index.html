@@ -29,11 +29,12 @@
 
         <form class="form" id="delete-form">
           <label class="field">
-            <span>Email or Username or phone number</span>
+            <span>Email Address</span>
             <input
-              type="text"
+              type="email"
+              id="email-input"
               name="email"
-              placeholder="Enter your email or username or phone number"
+              placeholder="Enter your account email"
               autocomplete="email"
               required
             />
@@ -43,6 +44,7 @@
             <span>Password</span>
             <input
               type="password"
+              id="password-input"
               name="password"
               placeholder="Enter your password"
               autocomplete="current-password"
@@ -58,6 +60,7 @@
             <span>Type <strong>DELETE</strong> to confirm</span>
             <input
                     type="text"
+                    id="confirm-input"
                     name="confirm"
                     placeholder="DELETE"
                     autocomplete="off"
@@ -65,7 +68,7 @@
             />
           </label>
           <label class="checkbox">
-            <input type="checkbox" name="acknowledge" required />
+            <input type="checkbox" id="acknowledge-checkbox" name="acknowledge" required />
             <span>I understand this action is permanent.</span>
           </label>
 
