@@ -1,21 +1,26 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import {
-  EmailAuthProvider,
-  deleteUser,
-  getAuth,
-  reauthenticateWithCredential,
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-// TODO: Replace with your Firebase project settings from Firebase Console.
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyBwJGOGCD8_fj-S6E1Ka8vgjhJp5Ef5SSA",
+  authDomain: "come-true-e5671.firebaseapp.com",
+  projectId: "come-true-e5671",
+  storageBucket: "come-true-e5671.appspot.com",
+  messagingSenderId: "498523407043",
+  appId: "1:498523407043:web:1e7e2994ca20fcd1675876",
+  measurementId: "G-S63EGVGCGN"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const analytics = getAnalytics(app);
+
+
 
 const form = document.getElementById("delete-form");
 const statusMessage = document.getElementById("status");
