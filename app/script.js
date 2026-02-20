@@ -57,6 +57,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+ const getProcessedEmail = (input) => {
+   const trimmedInput = input.trim();
+   // Improved check: allows leading 0 and optional +, and checks for digits
+   const isPhoneNumber = /^\+?[0-9]{7,15}$/.test(trimmedInput);
+
+   if (isPhoneNumber) {
+     console.log(`${trimmedInput} is detected as a phone number. Appending domain.`);
+     return `${trimmedInput}@cometrue.com`;
+   } else {
+     console.log(`${trimmedInput} is treated as a standard email.`);
+   }
+
+   return trimmedInput;
+ };
+
   const tryReauthenticateAndDelete = async (user, email, password) => {
     const credential = EmailAuthProvider.credential(email, password);
     await reauthenticateWithCredential(user, credential);
@@ -67,8 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
-      const email = emailInput?.value.trim();
+      const rawInput = emailInput?.value.trim();
       const password = passwordInput?.value.trim();
+      const email = getProcessedEmail(rawInput);
       let user = auth.currentUser;
 
       deleteButton.disabled = true;
@@ -79,9 +95,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!user) {
           setStatus("Logging you in...", "#5a5a5a");
           try {
+            console.log("Attempting sign-in with email:", email);
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             user = userCredential.user;
           } catch (loginError) {
+            console.error("Login failed:", loginError);
             throw new Error(`Login failed: ${loginError.message}`);
           }
         }
