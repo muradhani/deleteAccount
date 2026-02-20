@@ -3,7 +3,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebas
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-analytics.js";
 import {
   getAuth,
-  deleteUser,
   reauthenticateWithCredential,
   EmailAuthProvider,
   signInWithEmailAndPassword
@@ -49,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmationValue = confirmInput.value.trim().toUpperCase();
     const isAcknowledged = acknowledgeCheckbox.checked;
 
-    // Enable the button only if "DELETE" is exactly typed and checkbox is checked
     if (confirmationValue === "DELETE" && isAcknowledged) {
       deleteButton.disabled = false;
     } else {
@@ -57,25 +55,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
- const getProcessedEmail = (input) => {
-   const trimmedInput = input.trim();
-   // Improved check: allows leading 0 and optional +, and checks for digits
-   const isPhoneNumber = /^\+?[0-9]{7,15}$/.test(trimmedInput);
+  const getProcessedEmail = (input) => {
+    const trimmedInput = input.trim();
+    const isPhoneNumber = /^\+?[0-9]{7,15}$/.test(trimmedInput);
 
-   if (isPhoneNumber) {
-     console.log(`${trimmedInput} is detected as a phone number. Appending domain.`);
-     return `${trimmedInput}@cometrue.com`;
-   } else {
-     console.log(`${trimmedInput} is treated as a standard email.`);
-   }
+    if (isPhoneNumber) {
+      return `${trimmedInput}@cometrue.com`;
+    }
+    return trimmedInput;
+  };
 
-   return trimmedInput;
- };
+  /**
+   * Calls the specialized Cloud Function to delete the account and clean up data.
+   */
+  const callDeleteCloudFunction = async (user) => {
+    const idToken = await user.getIdToken(true); // Force refresh to ensure token is valid
+    const functionUrl = "https://asia-south1-come-true-e5671.cloudfunctions.net/deleteAccount";
 
-  const tryReauthenticateAndDelete = async (user, email, password) => {
-    const credential = EmailAuthProvider.credential(email, password);
-    await reauthenticateWithCredential(user, credential);
-    await deleteUser(user);
+    const response = await fetch(functionUrl, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${idToken}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Cloud Function failed to delete account.");
+    }
+
+    return result;
   };
 
   if (form) {
@@ -88,53 +99,44 @@ document.addEventListener('DOMContentLoaded', () => {
       let user = auth.currentUser;
 
       deleteButton.disabled = true;
-      setStatus("Processing your request...", "#5a5a5a");
+      setStatus("Processing deletion request...", "#5a5a5a");
 
       try {
-        // Step 1: Login if needed
+        // 1. Ensure user is logged in
         if (!user) {
           setStatus("Logging you in...", "#5a5a5a");
-          try {
-            console.log("Attempting sign-in with email:", email);
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            user = userCredential.user;
-          } catch (loginError) {
-            console.error("Login failed:", loginError);
-            throw new Error(`Login failed: ${loginError.message}`);
-          }
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          user = userCredential.user;
         }
 
-        // Step 2: Delete
-        setStatus("Deleting your account...", "#5a5a5a");
-        try {
-          await deleteUser(user);
-          setStatus("Your account was deleted successfully.", "#1f6a31");
-          form.reset();
-          updateDeleteState();
-        } catch (deleteError) {
-          // Step 3: Handle re-authentication if it's been a while since the last login
-          if (deleteError.code === "auth/requires-recent-login") {
-            setStatus("Re-verifying credentials...", "#5a5a5a");
-            await tryReauthenticateAndDelete(user, email, password);
-            setStatus("Re-verified and deleted successfully.", "#1f6a31");
-            form.reset();
-            updateDeleteState();
-          } else {
-            throw deleteError;
-          }
-        }
+        // 2. Re-authenticate to ensure the session is fresh (recommended for sensitive ops)
+        setStatus("Verifying credentials...", "#5a5a5a");
+        const credential = EmailAuthProvider.credential(email, password);
+        await reauthenticateWithCredential(user, credential);
+
+        // 3. Call your asia-south1 Cloud Function
+        setStatus("Executing cleanup and deletion...", "#5a5a5a");
+        await callDeleteCloudFunction(user);
+
+        // Success
+        setStatus("Your account and all related data have been deleted.", "#1f6a31");
+        form.reset();
+        updateDeleteState();
+
+        // Sign out locally
+        await auth.signOut();
+
       } catch (error) {
-        console.error("Account Deletion Error:", error);
+        console.error("Deletion Process Error:", error);
         setStatus(`Error: ${error.message}`, "#c02828");
+        deleteButton.disabled = false;
         updateDeleteState();
       }
     });
 
-    // Add listeners to the relevant inputs
     confirmInput.addEventListener("input", updateDeleteState);
     acknowledgeCheckbox.addEventListener("change", updateDeleteState);
   }
 
-  // Set the initial state when the page loads
   updateDeleteState();
 });
